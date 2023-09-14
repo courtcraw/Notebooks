@@ -377,8 +377,8 @@ class Star():
         slider_DPi1 = Slider(
             ax=fig.add_axes([xpos+xoff, ypos-yoff, width, 0.03]),
             label='DPi1',
-            valmin=30,
-            valmax=400,
+            valmin=0,
+            valmax=500,
             valinit=self.DPi1_init,
             valstep=0.5,
         )
