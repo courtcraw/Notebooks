@@ -169,7 +169,14 @@ class Star():
         self.d02_init = 0.15
         self.d01_init = 0.
         self.DPi1_init = 250
-        self.q_init = 0.5
+        self.q_init = 0.3
+
+        # initialize fit values
+        self.eps_p = self.eps_p_init
+        self.d02 = self.d02_init
+        self.d01 = self.d01_init
+        self.dPi = self.DPi1_init
+        self.q = self.q_init
         
         # get radial orders
         self.ns = np.unique(np.array(self.nu/self.Dnu, dtype=int))[1:-1]
@@ -236,6 +243,8 @@ class Star():
             #yaguang update:
             Theta_p = np.pi * (self.nu/slider_Dnu.val - (slider_d01.val + 0.5 + slider_eps_p.val))
             self.tau = 1/(self.nu*1e-6) + slider_DPi1.val/np.pi * np.arctan(slider_q.val / np.tan(Theta_p))
+
+            self.dPi = slider_DPi1.val
             
             z, ext, self.p_echelle_x, self.p_echelle_y = period_echelle(
                 self.tau, 
@@ -244,7 +253,11 @@ class Star():
                 **self.period_echelle_kwargs
             )
 
-            #self.dPi = slider_dPi1.val
+            self.eps_p = slider_eps_p.val
+            self.d02 = slider_d02.val
+            self.d01 = slider_d01.val
+            self.dPi = slider_DPi1.val
+            self.q = slider_q.val
             
             image2.set(array=z, extent=ext)
 #             image2.set(array=z[::-1,:], extent=ext)
@@ -275,6 +288,12 @@ class Star():
             l2 = np.abs(self.nu.reshape(-1,1) - (self.ns+slider_eps_p.val-slider_d02.val)*slider_Dnu.val ).argmin(axis=0)
             for i, tau in enumerate(self.tau[l0]): hlines0[i].set_ydata([tau, tau])
             for i, tau in enumerate(self.tau[l2]): hlines2[i].set_ydata([tau, tau])
+
+            self.eps_p = slider_eps_p.val
+            self.d02 = slider_d02.val
+            self.d01 = slider_d01.val
+            self.dPi = slider_DPi1.val
+            self.q = slider_q.val
         
             fig.canvas.draw_idle()
             
@@ -286,6 +305,12 @@ class Star():
             
             l2 = np.abs(self.nu.reshape(-1,1) - (self.ns+slider_eps_p.val-slider_d02.val)*slider_Dnu.val ).argmin(axis=0)
             for i, tau in enumerate(self.tau[l2]): hlines2[i].set_ydata([tau, tau]) 
+
+            self.eps_p = slider_eps_p.val
+            self.d02 = slider_d02.val
+            self.d01 = slider_d01.val
+            self.dPi = slider_DPi1.val
+            self.q = slider_q.val
         
             fig.canvas.draw_idle()
             
@@ -311,6 +336,12 @@ class Star():
 #             axes[1].invert_yaxis()
             axes[1].set_xlabel('Stretched period mod {:.1f} (s)'.format(slider_DPi1.val))
             fig.canvas.draw_idle()
+
+            self.eps_p = slider_eps_p.val
+            self.d02 = slider_d02.val
+            self.d01 = slider_d01.val
+            self.dPi = slider_DPi1.val
+            self.q = slider_q.val
             
             update_all_scatters()
 
