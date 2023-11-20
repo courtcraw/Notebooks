@@ -1,0 +1,167 @@
+# This is a TOML document
+
+title = "Monitoring configs, settings, and APIs"
+
+[owner]
+name = "Jamie Soon"
+email = "jamie.soon@anu.edu.au"
+
+[surveys]
+  [surveys.wise]
+    table = "external.neowise"
+    time_column = "mjd"
+    time_offset = 2400000.5
+    easy_name = "WISE"
+    index = 1
+    [surveys.wise.filters.w1]
+      magnitude = "w1mpro"
+      colour = [175, 0, 0]
+      svo = "WISE/WISE.W1"
+    [surveys.wise.filters.w2]
+      magnitude = "w2mpro"
+      colour = [102, 0, 0]
+      svo = "WISE/WISE.W2"
+
+  [surveys.ztf]
+    table = "external.ztf"
+    time_column = "jd"
+    time_offset = 0
+    easy_name = "ZTF"
+    index = 2
+    [surveys.ztf.filters.g-band]
+      column = "fid"
+      value = 1
+      magnitude = "magap"
+      type = "Diff"
+      colour = [0, 99, 0]
+      svo = "Palomar/ZTF.g"
+    [surveys.ztf.filters.r-band]
+      column = "fid"
+      value = 2
+      magnitude = "magap"
+      type = "Diff"
+      colour = [254, 201, 201]
+      svo = "Palomar/ZTF.g"
+
+  [surveys.atlas]
+    table = "external.atlas"
+    time_column = "mjd"
+    time_offset = 2400000.5
+    easy_name = "ATLAS"
+    index = 4
+    [surveys.atlas.filters.c-band]
+      column = "f"
+      value = "c"
+      magnitude = "m"
+      type = "Forced"
+      colour = [0, 255, 255]
+      svo = "Misc/Atlas.cyan"
+    [surveys.atlas.filters.o-band]
+      column = "f"
+      value = "o"
+      magnitude = "m"
+      type = "Forced"
+      colour = [255, 165, 0]
+      svo = "Misc/Atlas.orange"
+
+  [surveys.gaia_dr3]
+    table = "external.gaia_dr3"
+    time_column = "time"
+    time_offset = 2455197.5
+    easy_name = "Gaia"
+    index = 8
+    [surveys.gaia_dr3.filters.G]
+      column = "band"
+      value = "G "
+      magnitude = "mag"
+      colour = [255, 87, 51]
+      svo = "GAIA/GAIA3.G"
+    [surveys.gaia_dr3.filters.BP]
+      column = "band"
+      value = "BP"
+      magnitude = "mag"
+      colour = [0, 123, 255]
+      svo = "GAIA/GAIA3.Gbp"
+    [surveys.gaia_dr3.filters.RP]
+      column = "band"
+      value = "RP"
+      magnitude = "mag"
+      colour = [231, 84, 128]
+      svo = "GAIA/GAIA3.Grp"
+
+  [surveys.gattini]
+    table = "external.gattini"
+    time_column = "jd"
+    time_offset = 0
+    easy_name = "Gattini"
+    index = 16
+    access_control = true
+    [surveys.gattini.filters.J-band]
+      magnitude = "mag_ap3"
+      colour = [240, 0, 0]
+      svo = "2MASS/2MASS.J"
+
+  [surveys.rubin]
+    table = "external.rubin"
+    time_column = "mjd"
+    time_offset = 2400000.5
+    easy_name = "Rubin"
+    index = 32
+    access_control = true
+    [surveys.rubin.filters.u]
+      column = "filter"
+      value = "u"
+      magnitude = "m"
+      colour = [0, 0, 0]
+      svo = "LSST/LSST.u"
+    [surveys.rubin.filters.g]
+      column = "filter"
+      value = "g"
+      magnitude = "m"
+      colour = [0, 0, 0]
+      svo = "LSST/LSST.g"
+    [surveys.rubin.filters.r]
+      column = "filter"
+      value = "r"
+      magnitude = "m"
+      colour = [0, 0, 0]
+      svo = "LSST/LSST.r"
+    [surveys.rubin.filters.i]
+      column = "filter"
+      value = "i"
+      magnitude = "m"
+      colour = [0, 0, 0]
+      svo = "LSST/LSST.i"
+    [surveys.rubin.filters.z]
+      column = "filter"
+      value = "z"
+      magnitude = "m"
+      colour = [0, 0, 0]
+      svo = "LSST/LSST.z"
+    [surveys.rubin.filters.y]
+      column = "filter"
+      value = "y"
+      magnitude = "m"
+      colour = [0, 0, 0]
+      svo = "LSST/LSST.y"
+
+  [surveys.asassn]
+    table = "external.asassn"
+    time_column = "jd"
+    time_offset = 0
+    easy_name = "ASAS-SN"
+    index = 64
+    [surveys.asassn.filters.V-band]
+      column = "camera"
+      value = ["bA","bB","bC","bD","bE","bF","bG","bH"]
+      magnitude = "mag"
+      type = "Diff"
+      colour = [127, 0, 255]
+      svo = "Generic/Johnson.V"
+    [surveys.asassn.filters.g-band]
+      column = "camera"
+      value = ["bi","bj","bk","bl","bm","bn","bo","bp","bq","br","bs"]
+      magnitude = "mag"
+      type = "Diff"
+      colour = [84, 242, 7]
+      svo = "SLOAN/SDSS.g"
