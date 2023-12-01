@@ -15,14 +15,15 @@ from dataclasses import dataclass, field
 # 3rd Party
 import matplotlib.pyplot as plt
 import numpy as np
-
-# import as tomllib to eventually switch to the standard python package with python 3.11
+#import as tomllib to eventually switch to the standard python package with python 3.11
 import tomli as tomllib
 
-# Local
+#Local
 config_file = "config.toml"
-with open(config_file, "rb") as file:
-    config = tomllib.load(file)
+
+with open(config_file, "rb") as f:
+    config = tomllib.load(f)
+
 
 
 # Create dataclasses as it allows people to play with the data as opposed to fixed functions
@@ -119,37 +120,17 @@ class Lightcurves:
 
     def load_lightcurve_from_csv(self, input_file: str, survey: str = None) -> None:
         input_file = pathlib.Path(input_file)
+        lightcurve_data = np.genfromtxt(
+            input_file, delimiter=",", dtype=None, encoding=None, names=True
+        )
 
-        # Default value that isn't likely to be a filter
-        filter = "Pie"
-
-        if self.verbose > 2:
-            print(input_file)
-
-        if input_file.suffix == ".csv":
-            lightcurve_data = np.genfromtxt(
-                input_file, delimiter=",", dtype=None, encoding=None, names=True
-            )
-        else:
-            lightcurve_data = np.genfromtxt(
-                input_file, delimiter=None, dtype=None, encoding=None
-            )
-
-        # TODO: Squish data to remove column names and types!!!!!!! Therefore won't have to do type checking below.
-
-        # If survey not given, try to create from filename.
         if survey is None:
-            easy_survey, filter = self.parse_filename(input_file.stem)
+            easy_survey = self.parse_filename(input_file.stem)
             # Convert survey "easy name" in filename to config survey name
             for surveys in self.survey_data:
                 if self.survey_data[surveys]["easy_name"] == easy_survey:
                     survey = surveys
-                    break
 
-        if self.verbose > 2:
-            print(survey)
-
-        # Check if survey configuration exists.
         try:
             time_column = self.survey_data[survey]["time_column"]
             time_offset = self.survey_data[survey]["time_offset"]
@@ -159,73 +140,27 @@ class Lightcurves:
             )
             return
 
-        # If each filter has its own file no point in cycling
-        if easy_survey != filter:
-            filter_list = [filter]
-        else:
-            filter_list = self.survey_data[survey]["filters"]
-
-        for filters in filter_list:
-            # Load column information
-            magnitude_column = self.survey_data[survey]["filters"][filters]["magnitude"]
-            colour = tuple(self.survey_data[survey]["filters"][filters]["colour"])
-
-            # TODO: As below to account for column numbers.
-            # If multiple values exist, this can either be for different telescopes or data quality
+        for filters in self.survey_data[survey]["filters"]:
             if "value" in self.survey_data[survey]["filters"][filters]:
-                # Load filter information
                 filter_column = self.survey_data[survey]["filters"][filters]["column"]
                 filter_value = self.survey_data[survey]["filters"][filters]["value"]
 
-                # Check if list or individual
                 if type(filter_value) == list:
-                    if isinstance(filter_column, int):
-                        try:
-                            combined_mask = np.full(
-                                np.shape(lightcurve_data[:, filter_column]), False
-                            )
-                        except IndexError:
-                            filter_column = f"f{filter_column}"
-                            combined_mask = np.full(
-                                np.shape(lightcurve_data[filter_column]), False
-                            )
-                    else:
-                        combined_mask = np.full(
-                            np.shape(lightcurve_data[filter_column]), False
-                        )
-
-                    # combined_mask = np.full(np.shape(lightcurve_data[filter_column]), False)
-
-                    # Iterate through values
+                    combined_mask = np.full(
+                        np.shape(lightcurve_data[filter_column]), False
+                    )
                     for value in filter_value:
-                        if isinstance(filter_column, int):
-                            try:
-                                boolean_mask = (
-                                    lightcurve_data[:, filter_column] == value
-                                )
-                            except IndexError:
-                                filter_column = f"f{filter_column}"
-                                boolean_mask = lightcurve_data[filter_column] == value
-                        else:
-                            boolean_mask = lightcurve_data[filter_column] == value
-                        # boolean_mask = lightcurve_data[filter_column] == value
+                        boolean_mask = lightcurve_data[filter_column] == value
                         combined_mask = np.logical_or(combined_mask, boolean_mask)
                 else:
-                    if isinstance(filter_column, int):
-                        try:
-                            combined_mask = (
-                                lightcurve_data[:, filter_column] == filter_value
-                            )
-                        except IndexError:
-                            filter_column = f"f{filter_column}"
-                            combined_mask = (
-                                lightcurve_data[filter_column] == filter_value
-                            )
-                    else:
-                        combined_mask = lightcurve_data[filter_column] == filter_value
+                    combined_mask = lightcurve_data[filter_column] == filter_value
+
                 selected_data = lightcurve_data[combined_mask]
             else:
                 selected_data = lightcurve_data
+
+            magnitude_column = self.survey_data[survey]["filters"][filters]["magnitude"]
+            colour = tuple(self.survey_data[survey]["filters"][filters]["colour"])
 
             if self.verbose > 9:
                 print(survey)
@@ -234,63 +169,24 @@ class Lightcurves:
                 print(time_offset)
                 print(colour)
 
-            # return selected_data
+            self.add_lightcurve(
+                survey,
+                filters,
+                selected_data["ra"],
+                selected_data["dec"],
+                selected_data[time_column],
+                selected_data[magnitude_column],
+                time_offset,
+                colour,
+            )
 
-            # # Check if any data exists
-            # if len(selected_data[:, time_column]) == 0:
-            #     if self.verbose > 5:
-            #         print(f"No data from {survey} {filters} found.")
-            #     continue
-
-            # TODO: Replace assumption that all data with no column name has no RA or Dec.
-            # Either use column names or numbers:
-            if isinstance(time_column, int):
-                try:
-                    self.add_lightcurve(
-                        survey,
-                        filters,
-                        [self.ra] * len(selected_data[:, time_column]),
-                        [self.dec] * len(selected_data[:, time_column]),
-                        selected_data[:, time_column],
-                        selected_data[:, magnitude_column],
-                        time_offset,
-                        colour,
-                    )
-                except IndexError:
-                    # if numpy detects data types, columns go to f0, f1 etc.
-                    time_column = f"f{time_column}"
-                    self.add_lightcurve(
-                        survey,
-                        filters,
-                        [self.ra] * len(selected_data[time_column]),
-                        [self.dec] * len(selected_data[time_column]),
-                        selected_data[time_column],
-                        selected_data[f"f{magnitude_column}"],
-                        time_offset,
-                        colour,
-                    )
-            else:
-                self.add_lightcurve(
-                    survey,
-                    filters,
-                    selected_data["ra"],
-                    selected_data["dec"],
-                    selected_data[time_column],
-                    selected_data[magnitude_column],
-                    time_offset,
-                    colour,
-                )
-
-        return selected_data
+        return
 
     def load_lightcurves_from_folder(
-        self, input_folder: str, glob: str = "*.[csv dat txt]*"
+        self, input_folder: str, glob: str = "*.csv"
     ) -> list:
         input_folder = pathlib.Path(input_folder)
         files = sorted(input_folder.glob(glob))
-
-        if self.verbose > 3:
-            print(files)
 
         for indiviudal_file in files:
             self.load_lightcurve_from_csv(indiviudal_file)
@@ -298,13 +194,12 @@ class Lightcurves:
         return files
 
     def parse_filename(
-        self, filename: str, delimiter: str = "_", number: int = 0
+        self, filename: str, delimiter: str = "_", number: int = -1
     ) -> str:
         split_filename = filename.split(delimiter)
         survey = split_filename[number]
-        filter = split_filename[-1]
 
-        return survey, filter
+        return survey
 
     def plot(self, ax: plt.Axes) -> None:
         ax.clear()
@@ -328,21 +223,11 @@ class Lightcurves:
                     self.data[surveys][filters].magnitude,
                     color=colour,
                     label=label,
-                    s=5,
                 )
 
         ax.set_title(f"Name: {self.name}, RA:{self.ra:.5f}, Dec:{self.dec:.5f}")
 
-        bottom, top = ax.get_ylim()
-
-        if bottom > 25:
-            bottom = 25
-
-        if top < -5:
-            top = -5
-
-        ax.set_ylim(bottom, top)
-
+        ax.set_ylim(20, 0)
         ax.legend()
         return
 
@@ -350,7 +235,6 @@ class Lightcurves:
         self,
     ):
         raise NotImplementedError
-
 
 def main():
     # First EDIT config_file at the beginning of this file to the location of config.toml
@@ -375,10 +259,6 @@ def main():
     # Setup matplotlib
     fig = plt.figure(figsize=(16, 8), constrained_layout=True)
     ax = fig.add_subplot(111)
-
-    lightcurves.plot(ax)
-
-    plt.show()
 
     ax.set_xlabel("Time (JD)")
     ax.set_ylabel("Magnitude")

@@ -165,3 +165,71 @@ email = "jamie.soon@anu.edu.au"
       type = "Diff"
       colour = [84, 242, 7]
       svo = "SLOAN/SDSS.g"
+
+  [surveys.asas3]
+    table = "external.asas3"
+    # time_column = "HJD"
+    time_column = 0
+    time_offset = 2450000
+    easy_name = "ASAS-3"
+    index = 128
+    [surveys.asas3.filters.V-band]
+      # column = "GRADE"
+      column = 11
+      value = ["A","B"]
+      magnitude = 1
+      colour = [160, 37, 190]
+      svo = "Generic/Johnson.V"
+
+  [surveys.eros2]
+    table = "external.eros2"
+    time_column = 0
+    time_offset = 2450000
+    easy_name = "EROS-2"
+    index = 256
+    [surveys.eros2.filters.R]
+      magnitude = 1
+      colour = [0, 96, 32]
+      svo = "Generic/Cousins.I"
+    [surveys.eros2.filters.B]
+      magnitude = 1
+      colour = [255, 255, 150]
+      svo = "Generic/Johnson.V"
+
+  [surveys.ogleIII]
+    table = "external.ogleIII"
+    time_column = 0
+    time_offset = 0
+    easy_name = "OGLE-III"
+    index = 512
+    [surveys.ogleIII.filters.I-band]
+      magnitude = 1
+      colour = [210, 222, 26]
+      svo = "Generic/Johnson.I"
+
+  [surveys.ogleIV]
+    table = "external.ogleIV"
+    time_column = 0
+    time_offset = 0
+    easy_name = "OGLE-IV"
+    index = 1024
+    [surveys.ogleIV.filters.I-band]
+      magnitude = 1
+      colour = [161, 170, 4]
+      svo = "Generic/Johnson.I"
+
+  [surveys.kmt]
+    table = "external.kmt"
+    # time_column = "HJD"
+    time_column = 0
+    time_offset = 2450000
+    easy_name = "KMTNet"
+    index = 2048
+    [surveys.kmt.filters.I]
+      magnitude = 1
+      colour = [244, 131, 252]
+      svo = "Generic/Johnson.I"
+    [surveys.kmt.filters.V]
+      magnitude = 1
+      colour = [71, 34, 74]
+      svo = "Generic/Johnson.V"
